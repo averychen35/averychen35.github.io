@@ -23,6 +23,7 @@ body {
         h3,
         h4 {
             font-family: 'Source Sans Pro', sans-serif;
+            text-align: center;
         }
 
         table {
@@ -43,26 +44,32 @@ body {
 
         .image-row {
             display: flex;
-            justify-content: space-around; /* Distribute space between images /
-            align-items: center; / Align images vertically in the center /
-            flex-wrap: wrap; / Allow wrapping on smaller screens /
-            gap: 10px; / Space between images /
+            justify-content: space-around; /* Distribute space between images */
+            align-items: center; /* Align images vertically in the center */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 10px; /* Space between images */
         }
+
         .image-container {
-            text-align: center; / Center the text below images /
-            flex: 1; / Allows containers to grow and shrink equally /
-            max-width: 100%; / Ensures container does not exceed available width /
-            box-sizing: border-box; / Includes padding and border in the element's total width and height /
+            text-align: center; /* Center the text below images */
+            margin: 20px auto;
+            width: fit-content;
+            flex: 1; /* Allows containers to grow and shrink equally */
+            max-width: 600px; /* Ensures container does not exceed available width */
+            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
         }
+
         .image-container img {
-            max-width: 100%; / Ensures images are responsive /
-            height: auto; / Maintains aspect ratio /
-            display: block; / Removes whitespace below images /
+            justify-content: center;
+            max-width: 100%; /* Ensures images are responsive */
+            height: auto; /* Maintains aspect ratio */
+            display: block; /* Removes whitespace below images */
         }
+
         .caption {
-            margin-top: 5px; / Space between image and caption /
-            font-size: 14px; / Font size for the caption /
-            color: #555; / Color for the caption text */
+            margin-top: 5px; /* Space between image and caption */
+            font-size: 14px; /* Font size for the caption */
+            color: #555; /* Color for the caption text */
         }
 
         .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
