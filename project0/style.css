@@ -55,6 +55,7 @@ body {
             margin: 20px auto;
             width: fit-content;
             flex: 1; /* Allows containers to grow and shrink equally */
+            justify-content: center;
             max-width: 600px; /* Ensures container does not exceed available width */
             box-sizing: border-box; /* Includes padding and border in the element's total width and height */
         }
