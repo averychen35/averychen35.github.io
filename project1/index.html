@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Project 1: Colorizing the Prokudin-Gorskii photo collection</h1>
+
+    <h2>Introduction</h2>
+    <div class="desc">
+        In the 1900s, Sergei Mikhailovich Prokudin-Gorskii traveled all across the Russian Empire, taking color pictures through exposures of whatever he wanted to capture onto a glass plate, with three color filters: red, green, and blue. However, at his time, there was no way to print these color photographs or share them widely. 
+        Luckily for him, he has all of CS180 working on reconstructing his glass plates to produce color images!
+        In this project, I produce color images from these colored plates with a variety of image processing techniques. I start with the most basic direct overlap of the plates, move on to alignment within a fixed displacement window, minimizing pixelwise difference between colored plates, and finish with a more efficient, recursive image pyramid alignment algorithm. Enjoy!
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/uncolorized/cathedral.jpg" alt="cathedral">
+        </div>
+        <div class="image-container">
+            <img src="images/uncolorized/monastery.jpg" alt="monastery">
+        </div>
+        <div class="image-container">
+            <img src="images/uncolorized/tobolsk.jpg" alt="tobolsk">
+        </div>
+    </div>
+
+    <h2>Part 0: direct overlap</h2>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/overlap/cathedral.jpg" alt="cathedral">
+        </div>
+        <div class="image-container">
+            <img src="images/overlap/monastery.jpg" alt="monastery">
+        </div>
+        <div class="image-container">
+            <img src="images/overlap/tobolsk.jpg" alt="tobolsk">
+        </div>
+    </div>
+    <div class="desc">
+        First, I try the most naive algorithm: directly overlapping the red, green, and blue plates, after splitting the three color exposures in one image file in three. As you can see on the three smallest images, alignment is quite poor. Looks like I will have to devise an algorithm to better align the images. 
+    </div>
+
+    <h2>Part 1: naive alignment algorithm</h2>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/direct_align/cathedral.jpg" alt="cathedral">
+            <div class="desc">Cathedral <br> G displacement: (2, 5) <br> R displacement: (3, 12) <br> Time taken: 0.694 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/direct_align/monastery.jpg" alt="monastery">
+            <div class="desc">Monastery <br> G displacement: (2, -3) <br> R displacement: (2, 3) <br> Time taken: 1.460 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/direct_align/tobolsk.jpg" alt="tobolsk">
+            <div class="desc">Tobolsk <br> G displacement: (2, 3) <br> R displacement: (3, 6) <br> Time taken: 0.747 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/direct_align/emir.jpg" alt="emir">
+            <div class="desc">Emir <br> G displacement: (24, 49) <br> R displacement: (43, 49) <br> Time taken: 763.745 seconds</div>
+        </div>
+    </div>
+    <div class="desc">
+        The next algorithm I try searches over all displacements in a specified range [-15, 15] to minimize the pixelwise difference between color plates. I tried both NCC (noramlized cross correlation) and Euclidean distance, and since minimizing Euclidean distance between pixel values yielded better qualitative results I stuck with it for the rest of the project. At first, I was accidentally aligning the blue to green and blue to red, instead of vice versa. The switched order of which I was aligning to caused my photos to look off a bit. After fixing this bug, I aligned the red and green plates to the blue plate and achieved fairly aligned results for the small images.
+        Additionally, I only took the difference of the center 90% of the images, to reduce the effect of discrepancies across edges when calculating alignment.
+        <br><br>
+        Trying my naive algorithm on a larger image (emir.tif) I noticed misalignment. I kept increasing the window of displacements to search, but getting to 25x25 or 50x50 increased the runtime (listed below the image) so much that this was a sign for me to move on to a more efficient, image pyramid implementation. Because I iteratively search through every possible combination of (x, y) displacement, the search time scales quadratically with the search window size.
+        It didn't make sense to keep increasing the search window, as it was taking too long.
+    </div>
+    <h2>Part 2: image pyramid!</h2>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/pyramid_examples/cathedral.jpg" alt="cathedral">
+            <div class="desc">Cathedral <br> G displacement: (2, 5) <br> R displacement: (3, 12) <br> Time taken: 0.194 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/church.jpg" alt="church">
+            <div class="desc">Church <br> G displacement: (3, 25) <br> R displacement: (-5, 58) <br> Time taken: 16.877 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/emir.jpg" alt="emir">
+            <div class="desc">Emir <br> G displacement: (24, 49) <br> R displacement: (44, 88) <br> Time taken: 16.609 seconds</div>
+        </div>
+    </div>
+    <div class="desc">
+        Time for efficiency! 
+        In this part, I implemented a faster search procedure with a image pyramid. I resized the images to create a pyramid of images from coarse to fine, and at each level of the pyramid I ran the same naive alignment algorithm. This way, I could efficiently hone in on the best displacement without having to search a large area at each level.
+        For the image pyramid, it took me a while to figure out how to store the shift from one level of the pyramid to another and convert it. Since I went from coarse to fine with a 2x zoom until the original image size was reached, I just multipled the displacement from the previous level by 2 so it was accurate for the new level. With some level of experimentation, I realized I could shrink the search size down to [-6, 6] pixels, which helped runtime results. I experimented with a different number of levels of image pyramid and found that 6 levels seemed to do well, achieving an effective balance of precision and runtime.
+        I'm mostly happy with the results of my images. The only one that seems to struggle with alignment is emir.tif, which I believe could be improved thorugh Bells and Whistles.
+    </div>
+    <h2>Part 3: all results, plus some extras!</h2>
+        <div class="image-row">
+        <div class="image-container">
+            <img src="images/pyramid_examples/harvesters.jpg" alt="harvesters">
+            <div class="desc">Harvesters <br> G displacement: (16, 60) <br> R displacement: (13, 124) <br> Time taken: 18.878 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/icon.jpg" alt="icon">
+            <div class="desc">Icon <br> G displacement: (17, 41) <br> R displacement: (23, 89) <br> Time taken: 20.355 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/italil.jpg" alt="italil">
+            <div class="desc">Italil <br> G displacement: (21, 38) <br> R displacement: (35, 77) <br> Time taken: 24.529 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/pyramid_examples/lastochikino.jpg" alt="lastochikino">
+            <div class="desc">Lastochikino <br> G displacement: (-2, -3) <br> R displacement: (-9, 76) <br> Time taken: 19.025 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/lugano.jpg" alt="lugano">
+            <div class="desc">Lugano <br> G displacement: (-17, 41) <br> R displacement: (-29, 93) <br> Time taken: 18.547 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/melons.jpg" alt="melons">
+            <div class="desc">Melons <br> G displacement: (9, 82) <br> R displacement: (11, 177) <br> Time taken: 19.345 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/pyramid_examples/self_portrait.jpg" alt="self portrait">
+            <div class="desc">Self Portrait <br> G displacement: (29, 79) <br> R displacement: (34, 175) <br> Time taken: 19.601 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/siren.jpg" alt="siren">
+            <div class="desc">Siren <br> G displacement: (-7, 49) <br> R displacement: (-25, 96) <br> Time taken: 18.658 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/pyramid_examples/three_generations.jpg" alt="three generations">
+            <div class="desc">Three Generations <br> G displacement: (13, 55) <br> R displacement: (10, 112) <br> Time taken: 18.533 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/pyramid_examples/tobolsk.jpg" alt="tobolsk">
+            <div class="desc">Tobolsk <br> G displacement: (2, 3) <br> R displacement: (3, 6) <br> Time taken: 0.204 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/irrigation_canal.jpg" alt="irrigation canal">
+            <div class="desc">Irrigation Canal <br> G displacement: (24, 27) <br> R displacement: (49, 46) <br> Time taken: 24.664 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/mills.jpg" alt="mills">
+            <div class="desc">Mills <br> G displacement: (14, 56) <br> R displacement: (22, 124) <br> Time taken: 17.607 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/own_examples/monastery.jpg" alt="monastery">
+            <div class="desc">Monastery <br> G displacement: (1, 34) <br> R displacement: (3, 9) <br> Time taken: 0.883 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/railroad.jpg" alt="railroad">
+            <div class="desc">Railroad <br> G displacement: (5, 10) <br> R displacement: (4, 116) <br> Time taken: 19.559 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/village.jpg" alt="village">
+            <div class="desc">Village <br> G displacement: (14, 34) <br> R displacement: (23, 86) <br> Time taken: 17.174 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="images/own_examples/lady.jpg" alt="lady">
+            <div class="desc">Lady <br> G displacement: (8, 55) <br> R displacement: (12, 111) <br> Time taken: 13.721 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/onion_church.jpg" alt="onion church">
+            <div class="desc">Onion Church <br> G displacement: (26, 51) <br> R displacement: (36, 108) <br> Time taken: 12.147 seconds</div>
+        </div>
+        <div class="image-container">
+            <img src="images/own_examples/sculpture.jpg" alt="sculpture">
+            <div class="desc">Sculpture <br> G displacement: (-11, 33) <br> R displacement: (-26, 124) <br> Time taken: 13.398 seconds</div>
+        </div>
+    </div>
+</body>
+
+</html>
