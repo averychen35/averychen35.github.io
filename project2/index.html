@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project 2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Project 2: Fun with Filters and Frequencies!
+</h1>
+
+    <h2>Part 1: Fun with Filters</h2>
+    <h3>Part 1.1: Convolutions From Scratch!</h3>
+    <h3>Part 1.2: Finite Difference Operator</h3>
+    <div class="desc">
+    For part 1.2, we aim to find all the edges in the cameraman image!
+    First, I convolve the image with the finite difference operators, D_x and D_y.
+</div>
+<div class="image-row">
+    <img src="images/1.2/diff_op.png" alt="diff_op">
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/1.2/cameraman.png">
+            <div class="desc">original image</div>
+            </div>
+    <div class="image-container">
+            <img src="images/1.2/cameraman_dx.png">
+            <div class="desc">convolving with dx </div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.2/cameraman_dy.png">
+            <div class="desc">convolving with dy</div>
+        </div>
+</div>
+<div class="desc">
+The D_x convolution shows a lot of detail with the vertical lines, like the supports of the camera, the columns in the building. The D_y convolution shows more horizontal details, like the top of the camerman’s head and the tops of buildings. 
+</div>
+<div class="desc">
+
+Next, I compute the gradient magnitude image by taking the square root of the sum of the squared values in the dx and dy image. 
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/1.2/cameraman_grad_mag.png">
+            <div class="desc">gradient magnitude</div>
+            </div>
+    <div class="image-container">
+            <img src="images/1.2/cameraman_bin_0.1.png">
+            <div class="desc">0.1 threshold </div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.2/best_cameraman_bin_0.2.png">
+            <div class="desc">0.2 threshold</div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.2/cameraman_bin_0.3.png">
+            <div class="desc">0.3 threshold</div>
+        </div>
+</div>
+<div class="desc">
+
+
+I then experimented with various thresholds to binarize the gradient magnitude image and get an edge image. I settled upon 0.2 as my threshold, trying values from 0.1 to 0.9, incrementing by 0.1 each time. I find that 0.2 strikes the best balance between being too noisy and capturing all of the most important details. For example, the 0.1 threshold image is too noisy and there are artifacts that don’t exist in the original image in the sky and ground. However, the 0.3 threshold is missing some of the important details in the cameraman (arm and hand) and buildings in the background.
+</div>
+<div>
+<h3>Part 1.3: Derivative of Gaussian (DoG) Filter</h3>
+<div class="desc">
+    Now, we aim to get rid of some of the noise by using the Gaussian filter! My Gaussian filter of size 10 and sigma = 10/6
+    is created by taking the outer product of cv2.getGaussianKernel with itself as suggested.
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/1.3/cameraman_gaus_dx.png">
+            <div class="desc">Gaussian, then D_x</div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.3/cameraman_gaus_dy.png">
+            <div class="desc">Gaussian, then D_y</div>
+        </div>
+</div>
+</div>
+<div class="desc">
+    By convolving the cameraman image with the Gaussian filter, we get a blurred version of the original image. We then convolve the blurred image with D_x and D_y respectively. The resulting image looks to be a lot smoother than the original! This makes sense because applying the Gaussian filter removes high-frequency components from the image, making it look “smoother”. 
+
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/1.3/cameraman_grad_mag_gaus_one.png">
+            <div class="desc">gradient magnitude of Gaussian, then D_x/D_y</div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.3/cameraman_grad_mag_gaus.png">
+            <div class="desc">Gaussian of gradient magnitude</div>
+        </div>
+</div>
+</div>
+<div class="desc">Taking the gradient magnitude of the Gaussian blurred D_x and D_y is the same as taking the Gaussian of the gradient magnitude image! This is due to the “nice” properties of convolutions that we learned about in lecture, including associativity, it is possible to show that these result in the same image! Thus, the order of when the Gaussian is applied to the gradient magnitude does not alter the final image.</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/1.3/cameraman_gaus_0.1.png">
+            <div class="desc">0.1 threshold</div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.3/cameraman_gaus_0.2.png">
+            <div class="desc">0.2 threshold</div>
+        </div>
+        <div class="image-container">
+            <img src="images/1.3/cameraman_gaus_0.3.png">
+            <div class="desc">0.3 threshold</div>
+        </div>
+</div>
+</div>
+<div class="desc">
+
+    I find that using a threshold of 0.1 produces the best edge image--anything larger (0.2 and 0.3) loses a significant amount of detail.
+</div>
+
+
+<h2>Part 2: Fun with Frequencies!</h2>
+<h3>Part 2.1: Image "Sharpening"</h3>
+<h3>Part 2.2: Hybrid Images</h3>
+<div class="desc">
+    Onto some scary looking hybrid images!! The idea behind creating hybrid images is taking advantage of the different viewing distances of high frequency and low frequencies, so what an image looks like changes as you look closer/further.
+    I utilized the given image alignment code, with the same parameters for kerel size and sigma as before for the Gaussian filter.
+Derek? Or Cat?
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.2/DerekPicture.jpg">
+            <div class="desc">Derek</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/nutmeg.jpg">
+            <div class="desc">cat</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/hybrid_derek_nutmeg.png">
+            <div class="desc">what species is this? Sigma1 = 0.25, sigma2 = 0.9</div>
+        </div>
+</div>
+Do you see me, or my dog Katie?
+<div class="image-row">
+
+<div class="image-container">
+            <img src="images/2.2/blurred_cleardog.png">
+            <div class="desc">blurry katie!</div>
+        </div>
+<div class="image-container">
+            <img src="images/2.2/aligned_selfie.png">
+            <div class="desc">katie!</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/aligned_cleardog.png">
+            <div class="desc">me</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/highfreq_selfie.png">
+            <div class="desc">me, in high frequency</div>
+        </div>
+        
+        </div>
+</div>
+</div>
+<div class="image-container">
+            <img src="images/2.2/hybrid_avery_cleardog.png">
+            <div class="desc">blended image: sigma1 = 0.25, sigma2 = 5</div>
+        </div>
+        Fourier analysis!
+        <div class="image-row">
+
+<div class="image-container">
+            <img src="images/2.2/fourier_blurred_cleardog.png">
+            <div class="desc">blurry katie!</div>
+        </div>
+<div class="image-container">
+            <img src="images/2.2/fourier_cleardog.png">
+            <div class="desc">katie!</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/fourier_selfie.png">
+            <div class="desc">me</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/fourier_highfreq_selfie.png">
+            <div class="desc">me, in high frequency</div>
+        </div>
+        
+        </div>
+</div>
+</div>
+Katie's image doesn't have too many strong horizontal and vertical lines. Her fur seems to go in many directions
+
+<div class="image-container">
+            <img src="images/2.2/fourier_hybrid_avery_cleardog.png">
+            <div class="desc">blended image</div>
+        </div>
+
+Does anyone remember the song pen pineapple apple pen?
+<div class="image-row">
+
+<div class="image-container">
+            <img src="images/2.2/apple.jpg">
+            <div class="desc">apple</div>
+        </div>
+<div class="image-container">
+            <img src="images/2.2/pineapple.jpeg">
+            <div class="desc">pineapple</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/pine_apple.png">
+            <div class="desc">where's the pen? sigma1=0.3, sigma2=0.5</div>
+        </div>
+        
+        </div>
+
+
+
+Smiskis!
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.2/yoga.jpeg">
+            <div class="desc">zen</div>
+        </div>
+<div class="image-container">
+            <img src="images/2.2/looking.jpeg">
+            <div class="desc">hi there</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.2/smiskis.png">
+            <div class="desc"> sigma1=0.3, sigma2=0.8</div>
+        </div>
+        
+        </div>
+
+
+
+<h3>Part 2.3: Gaussian and Laplacian Stacks</h3>
+I work on creating Gaussian and Laplacian stacks in this part! For the Gaussian stack, I repeatedly apply the Gaussian filter to the image until it gets blurrier and blurrier. For the Laplacian stack, I subtract the images in the Gaussian stack from each other to get specific bands of frequencies. The last layer of the Laplacian stack contains the lowest frequencies and is just taken from the Gaussian stack.
+<div class="image-row">
+    
+<div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_0.png">
+            
+        </div>
+<div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_1.png">
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_3.png">
+           
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_5.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_6.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_gaussian_level_7.png">
+            
+        </div>
+        
+        </div>
+        Apple Gaussian stack
+
+        <div class="image-row">
+<div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_0.png">
+            
+        </div>
+<div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_1.png">
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_3.png">
+           
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_5.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_6.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/apple_laplacian_level_7.png">
+            
+        </div>
+        
+        </div>
+        Apple Laplacian stack
+        <div class="image-row">
+    
+<div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_0.png">
+            
+        </div>
+<div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_1.png">
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_3.png">
+           
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_5.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_6.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_gaussian_level_7.png">
+            
+        </div>
+        
+        </div>
+        Orange Gaussian stack
+
+        <div class="image-row">
+<div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_0.png">
+            
+        </div>
+<div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_1.png">
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_3.png">
+           
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_5.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_6.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.3/orange_laplacian_level_7.png">
+            
+        </div>
+        
+        </div>
+        Apple Laplacian stack
+<h3>Part 2.4: Multiresolution Blending (a.k.a. the oraple!)</h3>
+Onto image blending! To implement this image blending algorithm, I took inspiration from the given paper and lecture slides. I created a binary mask of half 1s on the entire left half and half 0s on the entire right half, and applied a Gaussian filter to this mask for each level, resulting in greater blend for low frequencies and less intense blend for higher frequencies. For each value in the left image, I multiply by the mask array, and for each value in the right image, I multiply by 1- the value in the mask array. Here are my results with the orapple!
+
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/orapple/masked_im1_level_0.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/masked_im2_level_0.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/blended_level_0.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/orapple/masked_im1_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/masked_im2_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/blended_level_2.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/orapple/masked_im1_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/masked_im2_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/blended_level_4.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/blended_first.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/blended_second.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/orapple/final_blended_image.png">
+            
+        </div>
+
+</div>
+I’ve always wondered what it’s like to swim in a bowl of cereal. This didn’t blend perfectly because the kiddie pool tube is a lot thicker than the cereal bowl, but I tried my best. For this one, I used the given image alignment code, then the same horizontal mask as the previous orapple example.
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/cereal_pool/kiddie_pool.jpg">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/cereal_pool/cereal_bowl.jpg">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/cereal_pool/final_blended_image.png">
+            
+        </div>
+        Lastly, I live out my dreams of becoming a buff Survivor player. I take Jonathan’s upper body and algin it to a picture of me. To create my circular mask, I took my aligned selfie and create a white mask for my face. I was able to align this with the opacity features in google slides. Then, I took a screenshot and loaded this in as a array to create the irregularly shaped mask. At first, I tried using a uniform circular mask, but results weren’t to my satisfaction, so I had to fit it better.
+
+<div class="image-row">
+     
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/headshot.jpg">
+    </div>
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/aligned_headshot.png">
+            
+        </div>
+         <div class="image-container">
+            <img src="images/2.4/updated_buff/aligned_survivor.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/survivor.jpg">
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/masked.png">
+    </div>
+        
+            
+        
+</div>
+<div class="image-row">
+     
+    
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/final_blended_image.png">
+            
+        </div>
+    
+        
+            
+        
+</div>
+
+
+</div>
+    </div>
+    
