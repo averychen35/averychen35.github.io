@@ -12,6 +12,34 @@
 
     <h2>Part 1: Fun with Filters</h2>
     <h3>Part 1.1: Convolutions From Scratch!</h3>
+    To start off, I implement my own four and two loop implementation of the scipy.signal.convolve2d, with mode=’same’.
+    <div class="image-row">
+    <div class="image-container">
+            <img src="images/1.1/four_loops.png">
+            <div class="desc">3274 seconds</div>
+            </div>
+    <div class="image-container">
+            <img src="images/1.1/two_loops_code.png">
+            <div class="desc">1311 seconds</div>
+        </div>
+    </div>
+    <div class="image-row">
+    <div class="image-container">
+            <img src="images/1.1/og_selfie.jpg">
+            <div class="desc">starting image</div>
+        </div>
+    <div class="image-container">
+            <img src="images/1.1/selfie.jpg">
+            <div class="desc">resulting blurred selfie</div>
+        </div>
+        </div>
+I construct a box filter to do blurring on my image, and the results look qualitatively the same for the two types of loops and the build in functions.
+
+Runtime: scipy.signal.convolve2d is much faster (4.34 seconds), than two for loops, which is a bit faster than four for loops: The first two for loops are much larger because they go over the entire size of the image, as compared to the 9x9 pixel filter which is a much smaller subset of the image.
+I wonder if they are able to use certain optimizations (loop unrolling like we learned about in 61C) to achieve even further optimizations as compared to the two loop filter I implemented.
+
+In terms of boundaries, the way I implemented the convolution matches that as of mode=”same” within scipy. When doing mode same, “The output is the same size as in1, centered with respect to the ‘full’ output.”. My code just doesn’t consider values outside of the range of the image (those values just contribute 0 to the total sum), but scipy calculates the full convolution so that the resulting image is larger than im1, then crops. Thus, I believe that the boundaries should appear the same in my implementation (which seems to be the case, based on my observations).
+</div>
     <h3>Part 1.2: Finite Difference Operator</h3>
     <div class="desc">
     For part 1.2, we aim to find all the edges in the cameraman image!
@@ -71,6 +99,10 @@ I then experimented with various thresholds to binarize the gradient magnitude i
     is created by taking the outer product of cv2.getGaussianKernel with itself as suggested.
 </div>
 <div class="image-row">
+    <div class="image-container">
+            <img src="images/1.3/gaussian_dx_big.png">
+            <div class="desc">Gaussian of D_x</div>
+        </div>
 <div class="image-container">
             <img src="images/1.3/cameraman_gaus_dx.png">
             <div class="desc">Gaussian, then D_x</div>
@@ -79,7 +111,14 @@ I then experimented with various thresholds to binarize the gradient magnitude i
             <img src="images/1.3/cameraman_gaus_dy.png">
             <div class="desc">Gaussian, then D_y</div>
         </div>
+        <div class="image-container">
+            <img src="images/1.3/gaussian_dy_big.png">
+            <div class="desc">Gaussian of D_y</div>
+        </div>
 </div>
+
+</div>
+
 </div>
 <div class="desc">
     By convolving the cameraman image with the Gaussian filter, we get a blurred version of the original image. We then convolve the blurred image with D_x and D_y respectively. The resulting image looks to be a lot smoother than the original! This makes sense because applying the Gaussian filter removes high-frequency components from the image, making it look “smoother”. 
@@ -97,7 +136,10 @@ I then experimented with various thresholds to binarize the gradient magnitude i
 </div>
 </div>
 <div class="desc">Taking the gradient magnitude of the Gaussian blurred D_x and D_y is the same as taking the Gaussian of the gradient magnitude image! This is due to the “nice” properties of convolutions that we learned about in lecture, including associativity, it is possible to show that these result in the same image! Thus, the order of when the Gaussian is applied to the gradient magnitude does not alter the final image.</div>
-<div class="image-row">
+<div class="image-row"><div class="image-container">
+            <img src="images/1.3/cameraman_gaus_0.05.png">
+            <div class="desc">0.05 threshold</div>
+        </div>
 <div class="image-container">
             <img src="images/1.3/cameraman_gaus_0.1.png">
             <div class="desc">0.1 threshold</div>
@@ -114,12 +156,76 @@ I then experimented with various thresholds to binarize the gradient magnitude i
 </div>
 <div class="desc">
 
-    I find that using a threshold of 0.1 produces the best edge image--anything larger (0.2 and 0.3) loses a significant amount of detail.
+    I find that using a threshold of 0.05 produces the best edge image--anything larger (0.1 or above) loses a significant amount of detail.
 </div>
 
 
 <h2>Part 2: Fun with Frequencies!</h2>
 <h3>Part 2.1: Image "Sharpening"</h3>
+To sharpen our image, or get more high frequencies in our final image, we subtract the blurred version of the image (created with a Gaussian filter) from the original. Then, we can add more high frequencies to our original image to sharpen it. However, we can combine this into a single convolution operation. To create the mask passed into this convolution, I pass in the Gaussian filter, unit impulse function, and sharpening factor. I construct the filter by doing [(1 + sharpening factor) × impulse function - sharpening factor × G]. This effectively gets the high frequencies and amplifies them, by multiplying them by 1 + sharpening factor. This argument sharpening factor is somewhat misleading, it’s technically the sharpening factor + 1 (if I pass in 1, it’s really sharpening by a factor of 2). I repeat this process on the red, blue, and green, then stack them back together.
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.1/unsharp_mask_filter.jpg">
+            <div class="desc">taken from lecture slides</div>
+        </div>
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.1/taj.jpg">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/taj_high_freq.png">
+            <div class="desc">high frequencies</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/taj_blurred.png">
+            <div class="desc">blurred</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/taj_sharpened.png">
+            <div class="desc">factor of 2</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/taj_sharp.png">
+            <div class="desc">factor of 4</div>
+        </div>
+</div>
+
+<div class="desc">
+    The even sharper Taj seems to look unrealistic. The sharpening of the scaffolding and details on the arch are exaggerated, especially for the distance from which the viewer is at. Additionally, there seems to be a glow around the top of the building, which makes the image look more surreal and less realistic.
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.1/landscape.jpg">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/landscape_high.png">
+            <div class="desc">high frequencies</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/landscape_sharp.png">
+            <div class="desc">final, with factor 2</div>
+        </div>
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/2.1/clear_dog.jpeg">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/clear_dog_high.png">
+            <div class="desc">high frequencies</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/clear_dog_sharp.png">
+            <div class="desc">final, with factor 2</div>
+        </div>
+</div>
+I experiment with blurring, then sharpening a clear image. Upon quick glance, the image looks alright. But, we lose the detail and the softness in Katie’s fur. Especially if you look above her nose, a lot of the hairs look coarser (they’re white), losing the definition and detail that gives it the soft look in the original image. We cannot reconstruct the details that were lost through the blurring process.
+
+
 <h3>Part 2.2: Hybrid Images</h3>
 <div class="desc">
     Onto some scary looking hybrid images!! The idea behind creating hybrid images is taking advantage of the different viewing distances of high frequency and low frequencies, so what an image looks like changes as you look closer/further.
@@ -199,17 +305,18 @@ Katie's image doesn't have too many strong horizontal and vertical lines. Her fu
 Does anyone remember the song pen pineapple apple pen?
 <div class="image-row">
 
-<div class="image-container">
-            <img src="images/2.2/apple.jpg">
-            <div class="desc">apple</div>
-        </div>
+
 <div class="image-container">
             <img src="images/2.2/pineapple.jpeg">
             <div class="desc">pineapple</div>
         </div>
         <div class="image-container">
+            <img src="images/2.2/apple.jpg">
+            <div class="desc">apple</div>
+        </div>
+        <div class="image-container">
             <img src="images/2.2/pine_apple.png">
-            <div class="desc">where's the pen? sigma1=0.3, sigma2=0.5</div>
+            <div class="desc">sigma1=0.3, sigma2=0.5</div>
         </div>
         
         </div>
@@ -495,6 +602,11 @@ I’ve always wondered what it’s like to swim in a bowl of cereal. This didn�
             
         
 </div>
+Besides the fact that I look really good buff, the most important thing I learned from this project was 
+how challenging image editing is! Constructing the irregular mask in 2.4 took me a while and it's still not perfect.
+Additionally, this makes me think about the power of generative models to alter or create imaginative images. The fact
+that these models can relatively quickly and efficiently generate images is crazy as it would take a lot more time and work
+to manually come up with these image modifications.
 
 
 </div>
