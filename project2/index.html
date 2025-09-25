@@ -25,7 +25,7 @@
     </div>
     <div class="image-row">
     <div class="image-container">
-            <img src="images/1.1/og_selfie.jpg">
+            <img src="images/starting_images/og_selfie.jpg">
             <div class="desc">starting image</div>
         </div>
     <div class="image-container">
@@ -33,13 +33,23 @@
             <div class="desc">resulting blurred selfie</div>
         </div>
         </div>
-I construct a box filter to do blurring on my image, and the results look qualitatively the same for the two types of loops and the build in functions.
+I construct a box filter to do blurring on my image, and the results look qualitatively the same for the two types of loops and the built in functions.
 
-Runtime: scipy.signal.convolve2d is much faster (4.34 seconds), than two for loops, which is a bit faster than four for loops: The first two for loops are much larger because they go over the entire size of the image, as compared to the 9x9 pixel filter which is a much smaller subset of the image.
-I wonder if they are able to use certain optimizations (loop unrolling like we learned about in 61C) to achieve even further optimizations as compared to the two loop filter I implemented.
+Runtime: scipy.signal.convolve2d is much faster (4.34 seconds), than two for loops, which is also significantly faster than four for loops. Although the second two loops are much smaller, they still require a few operations which probably adds to the longer runtime. For the scipy implementation, I wonder if they are able to use certain optimizations (loop unrolling like we learned about in 61C) to achieve even further optimizations as compared to the two loop filter I implemented.
 
-In terms of boundaries, the way I implemented the convolution matches that as of mode=”same” within scipy. When doing mode same, “The output is the same size as in1, centered with respect to the ‘full’ output.”. My code just doesn’t consider values outside of the range of the image (those values just contribute 0 to the total sum), but scipy calculates the full convolution so that the resulting image is larger than im1, then crops. Thus, I believe that the boundaries should appear the same in my implementation (which seems to be the case, based on my observations).
+In terms of boundaries, the way I implemented the convolution matches that as of mode=”same” within scipy. When doing “same” mode, “The output is the same size as in1, centered with respect to the ‘full’ output.”. My code just doesn’t consider values outside of the range of the image (those values just contribute 0 to the total sum), but scipy calculates the full convolution so that the resulting image is larger than im1, then crops. Even though the handling of boundaries in calculation is different, I believe that the final image and boundaries should appear the same in my implementation (which seems to be the case, based on my observations).
+    <div class="image-row">
+    <div class="image-container">
+            <img src="images/1.1/selfie_dx.jpg">
+            <div class="desc">convolved with D_x</div>
+        </div>
+    <div class="image-container">
+            <img src="images/1.1/selfie_dy.jpg">
+            <div class="desc">convolved with D_y</div>
+        </div>
+        </div>
 </div>
+I then convolve my image with the finite difference operators D_x and D_y. The hanging lights are much more clear in the D_xas they hang vertically -> there are greater changes when moving horizontally from wall to light back to wall, as well as observing the textures in the map in the upper left. For the D_y image, details like the top of my arm and top of my head are more clear. 
     <h3>Part 1.2: Finite Difference Operator</h3>
     <div class="desc">
     For part 1.2, we aim to find all the edges in the cameraman image!
@@ -197,7 +207,7 @@ To sharpen our image, or get more high frequencies in our final image, we subtra
 </div>
 <div class="image-row">
 <div class="image-container">
-            <img src="images/2.1/landscape.jpg">
+            <img src="images/starting_images/landscape.jpg">
             <div class="desc">original</div>
         </div>
         <div class="image-container">
@@ -211,7 +221,21 @@ To sharpen our image, or get more high frequencies in our final image, we subtra
 </div>
 <div class="image-row">
 <div class="image-container">
-            <img src="images/2.1/clear_dog.jpeg">
+            <img src="images/2.1/fetch.jpg">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/fetch_high.png">
+            <div class="desc">high frequencies</div>
+        </div>
+        <div class="image-container">
+            <img src="images/2.1/fetch_sharp.png">
+            <div class="desc">final, with factor 2</div>
+        </div>
+</div>
+<div class="image-row">
+<div class="image-container">
+            <img src="images/starting_images/clear_dog.jpeg">
             <div class="desc">original</div>
         </div>
         <div class="image-container">
@@ -307,11 +331,11 @@ Does anyone remember the song pen pineapple apple pen?
 
 
 <div class="image-container">
-            <img src="images/2.2/pineapple.jpeg">
+            <img src="images/starting_images/pineapple.jpeg">
             <div class="desc">pineapple</div>
         </div>
         <div class="image-container">
-            <img src="images/2.2/apple.jpg">
+            <img src="images/starting_images/apple.jpg">
             <div class="desc">apple</div>
         </div>
         <div class="image-container">
@@ -326,15 +350,15 @@ Does anyone remember the song pen pineapple apple pen?
 Smiskis!
 <div class="image-row">
 <div class="image-container">
-            <img src="images/2.2/yoga.jpeg">
+            <img src="images/starting_images/yoga.jpeg">
             <div class="desc">zen</div>
         </div>
 <div class="image-container">
-            <img src="images/2.2/looking.jpeg">
+            <img src="images/starting_images/looking.jpeg">
             <div class="desc">hi there</div>
         </div>
         <div class="image-container">
-            <img src="images/2.2/smiskis.png">
+            <img src="images/2.2/better_smiskis.png">
             <div class="desc"> sigma1=0.3, sigma2=0.8</div>
         </div>
         
@@ -554,11 +578,11 @@ Onto image blending! To implement this image blending algorithm, I took inspirat
 I’ve always wondered what it’s like to swim in a bowl of cereal. This didn’t blend perfectly because the kiddie pool tube is a lot thicker than the cereal bowl, but I tried my best. For this one, I used the given image alignment code, then the same horizontal mask as the previous orapple example.
 <div class="image-row">
     <div class="image-container">
-            <img src="images/2.4/cereal_pool/kiddie_pool.jpg">
+            <img src="images/starting_images/kiddie_pool.jpg">
             
         </div>
         <div class="image-container">
-            <img src="images/2.4/cereal_pool/cereal_bowl.jpg">
+            <img src="images/starting_images/cereal_bowl.jpg">
             
         </div>
         <div class="image-container">
@@ -570,7 +594,7 @@ I’ve always wondered what it’s like to swim in a bowl of cereal. This didn�
 <div class="image-row">
      
     <div class="image-container">
-            <img src="images/2.4/updated_buff/headshot.jpg">
+            <img src="images/starting_images/headshot.jpg">
     </div>
     <div class="image-container">
             <img src="images/2.4/updated_buff/aligned_headshot.png">
@@ -581,7 +605,7 @@ I’ve always wondered what it’s like to swim in a bowl of cereal. This didn�
             
         </div>
         <div class="image-container">
-            <img src="images/2.4/updated_buff/survivor.jpg">
+            <img src="images/starting_images/survivor.jpg">
         </div>
         <div class="image-container">
             <img src="images/2.4/updated_buff/masked.png">
@@ -589,6 +613,68 @@ I’ve always wondered what it’s like to swim in a bowl of cereal. This didn�
         
             
         
+</div>
+
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im1_level_0.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im2_level_0.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/blended_level_0.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im1_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im2_level_2.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/blended_level_2.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+    <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im1_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/masked_im2_level_4.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/updated_buff/blended_level_4.png">
+            
+        </div>
+
+</div>
+<div class="image-row">
+
+        <div class="image-container">
+            <img src="images/2.4/avery_blended.png">
+            
+        </div>
+        <div class="image-container">
+            <img src="images/2.4/survivor_blended.png">
+            
+        </div>
+            <div class="image-container">
+            <img src="images/2.4/updated_buff/final_blended_image.png">
+            
+        </div>
+
 </div>
 <div class="image-row">
      
