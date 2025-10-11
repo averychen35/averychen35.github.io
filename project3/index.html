@@ -11,7 +11,8 @@
 
     <h2>Part A1: Shoot the Pictures</h2>
     <div class="desc">
-        Three of these image pairs were taken in SF on a cloudy day with my digicam. The last was taken of a corner of my room on my phone (hi Laufey!!). 
+        Three of these image pairs were taken in SF on a cloudy day with my digicam. The last was taken of a corner of
+        my room on my phone (hi Laufey!!).
     </div>
     <div class="image-row">
         <div class="image-container">
@@ -49,10 +50,16 @@
 
     <h2>Part A2: Recover Homographies</h2>
 
-    I use the hints provided in lecture notes in order to set up the calculation of the homography matrix. As the discussion so eloquently explains, homographies are defined up to scale, so we can fix h9 = 1. With 8 unknowns (we fix i to be 1, as the scaling factor), we need at least 4 sets of points (each providing an x, y value) to completely solve the equation. However, it is helpful to have more than 4 sets of points, for greater accuracy, as overdetermining the system can help make up for correspondence errors. Then, we can use least squares to minimize the inaccuracies in the homography matrix. 
+    I use the hints provided in lecture notes in order to set up the calculation of the homography matrix. As the
+    discussion so eloquently explains, homographies are defined up to scale, so we can fix h9 = 1. With 8 unknowns (we
+    fix i to be 1, as the scaling factor), we need at least 4 sets of points (each providing an x, y value) to
+    completely solve the equation. However, it is helpful to have more than 4 sets of points, for greater accuracy, as
+    overdetermining the system can help make up for correspondence errors. Then, we can use least squares to minimize
+    the inaccuracies in the homography matrix.
 
 
-    I change the shape of H to make it easier to solve for a-h. Discussion 5 does a great way of explaining the process of solving and simplifying equations to get the resulting homography matrix.
+    I change the shape of H to make it easier to solve for a-h. Discussion 5 does a great way of explaining the process
+    of solving and simplifying equations to get the resulting homography matrix.
     <div class="image-row">
         <div class="image-container">
             <img src="part_a_ims/sys_equations.png">
@@ -71,8 +78,8 @@
         </div>
     </div>
     <div class="image-container">
-            <img src="part_a_ims/part_2/park.png">
-        </div>
+        <img src="part_a_ims/part_2/park.png">
+    </div>
     <div class="image-row">
         <div class="image-container">
             <img src="part_a_ims/part_2/roof_1.png">
@@ -82,8 +89,8 @@
         </div>
     </div>
     <div class="image-container">
-            <img src="part_a_ims/part_2/roof_num.png">
-        </div>
+        <img src="part_a_ims/part_2/roof_num.png">
+    </div>
     <div class="image-row">
         <div class="image-container">
             <img src="part_a_ims/part_2/roof_a.png">
@@ -93,8 +100,8 @@
         </div>
     </div>
     <div class="image-container">
-            <img src="part_a_ims/part_2/roof.png">
-        </div>
+        <img src="part_a_ims/part_2/roof.png">
+    </div>
 
     <div class="image-row">
         <div class="image-container">
@@ -105,17 +112,28 @@
         </div>
     </div>
     <div class="image-container">
-            <img src="part_a_ims/part_2/room.png">
-        </div>
+        <img src="part_a_ims/part_2/room.png">
+    </div>
     <h2>Part A3: Warp the Images</h2>
 
-    For both of these functions, I implement a helper function to get the bounds of the new image, after applying the homography matrix. To implement the nearest neighbor code, I use the inverse of the homography matrix to get the corresponding source pixel for each output pixel, rounding coordinates to the nearest pixel data. I make sure to normalize the result of the coordinates (as they are all multiplied by w), round to the nearest whole number index, and ensure the corresponding source pixel is within bounds of the original image. 
+    For both of these functions, I implement a helper function to get the bounds of the new image, after applying the
+    homography matrix. To implement the nearest neighbor code, I use the inverse of the homography matrix to get the
+    corresponding source pixel for each output pixel, rounding coordinates to the nearest pixel data. I make sure to
+    normalize the result of the coordinates (as they are all multiplied by w), round to the nearest whole number index,
+    and ensure the corresponding source pixel is within bounds of the original image.
 
-    We actually already had to implement bilinear interpolation during the first 189 homework (which caused me quite some grief) so I got to implement it again! We still get the coordinates in the source pixel that correspond with each output pixel, but instead, use the weighted averaging of the four neighboring pixels. It took some time for me to figure out the weights of each pixel (it can be somewhat counterintuitive) and construct the image based on these points and weights. 
+    We actually already had to implement bilinear interpolation during the first 189 homework (which caused me quite
+    some grief) so I got to implement it again! We still get the coordinates in the source pixel that correspond with
+    each output pixel, but instead, use the weighted averaging of the four neighboring pixels. It took some time for me
+    to figure out the weights of each pixel (it can be somewhat counterintuitive) and construct the image based on these
+    points and weights.
 
-    I also set the alpha mask for each image to be 1 where the image exists, and 0 in other places. This becomes helpful later in the project! Having a part of the image that doesn’t exist being interpreted as black vs. clear could definitely cause annoying issues. 
+    I also set the alpha mask for each image to be 1 where the image exists, and 0 in other places. This becomes helpful
+    later in the project! Having a part of the image that doesn’t exist being interpreted as black vs. clear could
+    definitely cause annoying issues.
 
-    To test out my functions, I perform rectification with images that have known squares. I select the four points of the square clockwise for im1points and map to [0,0],[100,0],[100,100],[0,100].
+    To test out my functions, I perform rectification with images that have known squares. I select the four points of
+    the square clockwise for im1points and map to [0,0],[100,0],[100,100],[0,100].
 
     These were both taken in the Netherlands!
     <div class="image-row">
@@ -127,106 +145,313 @@
             <img src="part_a_ims/part_3/output_roof.png">
             <div class="desc">selected points</div>
         </div>
-    <div class="image-row">
-            <div class="image-container">
-            <img src="part_a_ims/part_3/roof_warped.png">
-            <div class="desc">nearest neighbor</div>
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/part_3/roof_warped_bi.png">
-            <div class="desc">bilinear</div>
-        </div>
-        </div>
-    <div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/part_3/floor_cropped.jpg">
-            <div class="desc">original</div>
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/part_3/output_floor.png">
-            <div class="desc">selected points</div>
-        </div>
-    <div class="image-row">
-            <div class="image-container">
-            <img src="part_a_ims/part_3/floor_cropped_warped.png">
-            <div class="desc">nearest neighbor</div>
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/part_3/floor_cropped_warped_bi.png">
-            <div class="desc">bilinear</div>
-        </div>
-        </div>
-
-        It takes about 20-25% more time to do bilinear interpolation vs nearest neighbor interpolation (2.22 vs 2.86 seconds for the window and 2.69 vs 3.00 seconds for the floor). This might be because we need to consider four points instead of one and thus more computations to weight each point. 
-
-        In terms of quality, the bilinear interpolation takes the cake. The lines around the window are so much less grainy than nearest neighbor interpolation because it takes into account many pixels, instead of a lumpy look where edges that are black get somewhat warped. Some of the lines in the floor also have a jagged look for nearest neighbor interpolation, particularly with the dark brown in the upper right-hand corner. 
-
-        <h2>Part A4: Blend the Images into a Mosaic</h2>
-
-        First, to make sure that my image overlapping was working well, I implemented a naive algorithm that just weights images by 0.5 in the overlap region and 1 elsewhere. You can see that the edges of the images are very clear, so this was a sign to try something fancier. 
-<div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/roof_1.JPG">
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/roof_2.JPG">
-</div>
- </div>
         <div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/part_4/roof_2_overlapped.png">
-        </div>
-   
-
-    For the Gaussian/Laplacian blending, I follow the steps outlined in the project description.
-1. I calculate the dimensions of the output image
-2. I pad both images with 0s to match the dimensions of the output image.
-3. I use scipy.ndimage.distance_transform_edt to create a distance map for each image
-4. I create the mask to blend with using these distance maps for each image, setting the mask to 1 where the distance map at the first image is greater than the distance map at the second image.
-5. I blurred this mask with a Gaussian kernel
-6. Utilizing my code from project 2, I create Gaussian and Laplacian stacks and put the blended images back together!
-
-This image taken from Mission Dolores Park really bothers me. I tried using a larger Gaussian kernel (60 pixels) and 5 levels but the different in sky color is still quite apparent. I think the weather was so temperamental it changed in the second I moved my camera!
-<div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/park_c.JPG">
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/park_d.JPG">
-        </div>
+            <div class="image-container">
+                <img src="part_a_ims/part_3/roof_warped.png">
+                <div class="desc">nearest neighbor</div>
+            </div>
+            <div class="image-container">
+                <img src="part_a_ims/part_3/roof_warped_bi.png">
+                <div class="desc">bilinear</div>
+            </div>
         </div>
         <div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/part_4/park_final_image.png">
+            <div class="image-container">
+                <img src="part_a_ims/part_3/floor_cropped.jpg">
+                <div class="desc">original</div>
+            </div>
+            <div class="image-container">
+                <img src="part_a_ims/part_3/output_floor.png">
+                <div class="desc">selected points</div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/part_3/floor_cropped_warped.png">
+                    <div class="desc">nearest neighbor</div>
+                </div>
+                <div class="image-container">
+                    <img src="part_a_ims/part_3/floor_cropped_warped_bi.png">
+                    <div class="desc">bilinear</div>
+                </div>
+            </div>
+
+            It takes about 20-25% more time to do bilinear interpolation vs nearest neighbor interpolation (2.22 vs 2.86
+            seconds for the window and 2.69 vs 3.00 seconds for the floor). This might be because we need to consider
+            four points instead of one and thus more computations to weight each point.
+
+            In terms of quality, the bilinear interpolation takes the cake. The lines around the window are so much less
+            grainy than nearest neighbor interpolation because it takes into account many pixels, instead of a lumpy
+            look where edges that are black get somewhat warped. Some of the lines in the floor also have a jagged look
+            for nearest neighbor interpolation, particularly with the dark brown in the upper right-hand corner.
+
+            <h2>Part A4: Blend the Images into a Mosaic</h2>
+
+            First, to make sure that my image overlapping was working well, I implemented a naive algorithm that just
+            weights images by 0.5 in the overlap region and 1 elsewhere. You can see that the edges of the images are
+            very clear, so this was a sign to try something fancier.
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/roof_1.JPG">
+                </div>
+                <div class="image-container">
+                    <img src="part_a_ims/roof_2.JPG">
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/part_4/roof_2_overlapped.png">
+                </div>
+            </div>
+            <ol>
+                <li> I calculate the dimensions of the output image</li>
+                <li> I pad both images with 0s to match the dimensions of the output image.</li>
+                <li> I use scipy.ndimage.distance_transform_edt to create a distance map for each image</li>
+                <li> Utilizing my code from project 2, I create Gaussian and Laplacian pyramids of two levels and create
+                    the final image with weighted averaging determined by the distance_transform_edt function.</li>
+            </ol>
+            You can still see a little bit of the seam.
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/room_2.jpg">
+                </div>
+                <div class="image-container">
+                    <img src="part_a_ims/room_3.jpg">
+                </div>
+
+                <div class="image-container">
+                    <img src="part_a_ims/new_overlapped/room/room_final_image.png">
+                    <div class="desc">It’s almost impossible to see the seam for this indoor image!</div>
+                </div>
+            </div>
+
+
+
+
+
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/roof_1.jpg">
+                </div>
+                <div class="image-container">
+                    <img src="part_a_ims/roof_2.jpg">
+                </div>
+
+
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/new_overlapped/roof_num/roof_final_image.png">
+                    <div class="desc">You can see the seam if you look close enough.</div>
+                </div>
+            </div>
+
+
+
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/roof_a.JPG">
+                </div>
+                <div class="image-container">
+                    <img src="part_a_ims/roof_b.JPG">
+                </div>
+
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="part_a_ims/new_overlapped/roof/roof_blended_image.png">
+                    <div class="desc">This other outdoor image taken from the roof of an apartment building does quite
+                        well.</div>
+                </div>
+
+            </div>
+            <div>
+
+            </div>
         </div>
-        </div>
-It’s almost impossible to see the seam for this indoor image!
-<div class="image-row">
-        <div class="image-container">
-            <img src="part_a_ims/room_2.jpg">
-        </div>
-        <div class="image-container">
-            <img src="part_a_ims/room_3.jpg">
-        </div>
-        
-        <div class="image-container">
-            <img src="part_a_ims/part_4/room_final_image.png">
-        </div>
+        <h2>Part B1: Harris Corner Detection</h2>
+
+        I used the harris.py provided as part of the project to detect Harris corners. I tried implementing ANMS after
+        that, but my kernel kept crashing. Turns out calculating pairwise distance between 195k points crashes your
+        kernel!
+
+        After doing some light filtering on the Harris points, I calculated ANMS (Adaptive Non-Maximal Suppression) as
+        follows, with c_robust = 0.9 and num_corners = 500.
+
+        <ol>
+            <li>Obtained the Harris score at each corner</li>
+            <li>Constructed an array of distances for all pairs of corners</li>
+            <li>Created a mask to figure out if f(x_i) < c_robust * f(x_j). This is the specific line of code I used
+                    mask=scores[:, np.newaxis] < (c * scores[np.newaxis, :])</li>
+            <li>I set 0 values to infinity, because we sort by min values later</li>
+            <li>Find the minimum distance for each point</li>
+            <li>Sort indices by min distance, then reverse the array to get the largest radius. I then selected the top
+                500 points after sorting by radius.</li>
+        </ol>
+        Funny thing is I also heavily relied upon the Laufey poster to find correspondences.
+
+        <div class="image-row">
+            <div class="image-container">
+                <img src="part_b_ims/harris_no_filter.png">
+                <div class="desc">Harris corners (with prefiltering)</div>
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/anms.png">
+                <div class="desc">ANMS corners</div>
+            </div>
         </div>
 
-This other outdoor image taken from the roof of an apartment building does quite well. 
+        <h2>Part B2: Feature Descriptor Extraction</h2>
 
-<div class="image-row">
+        To extract features, I pass in the points associated with good Harris corners, as found earlier. For each one of
+        these points, I extract the 40x40 pixel patch around it, if the full 40x40 pixel patch falls within the image.
+        Then, I downsample the patch to 8x8 pixels and normalize (which allows us to compare patches between images). I
+        keep track of which points correspond to extractable features (ones that fall within the image bounds).
+
+        <div class="image-row">
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_0.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_1.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_2.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_3.png">
+            </div>
+        </div>
+        <div class="image-row">
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_4.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_5.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_6.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_7.png">
+            </div>
+        </div>
+        <div class="image-row">
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_8.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_9.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_10.png">
+            </div>
+            <div class="image-container">
+                <img src="part_b_ims/b3_features/part2_feature_11.png">
+            </div>
+        </div>
+    </div>
+
+    <h2>Part B3: Feature Matching</h2>
+
+    To match features between images, I use the procedure described in section 5 of the paper. First, I calculate
+    feature pairwise differences. Then I sort each row in ascending order of pixelwise difference, to get the first
+    closest and second closest feature match. I calculate the Lowe ratio as the error of the first nearest neighbor /
+    error of the second nearest neighbor. I only keep matches that are less than my Lowe threshold.
+
+    <div class="image-row">
         <div class="image-container">
-            <img src="part_a_ims/roof_a.JPG">
+            <img src="part_b_ims/b4_matches/part2_match_pair_0.png">
         </div>
         <div class="image-container">
-            <img src="part_a_ims/roof_b.JPG">
-        </div>
+            <img src="part_b_ims/b4_matches/part2_match_pair_1.png">
         </div>
         <div class="image-container">
-            <img src="part_a_ims/part_4/roof_final_image.png">
+            <img src="part_b_ims/b4_matches/part2_match_pair_2.png">
         </div>
-        
+
+    </div>
+    <div class="image-row">
+
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_3.png">
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_4.png">
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_5.png">
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_6.png">
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_7.png">
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b4_matches/part2_match_pair_8.png">
+        </div>
+    </div>
+
+    <h2>Part B4: RANSAC for Robust Homography</h2>
+    I implement the RANSAC (random sample consensus) algorithm as described in lecture and discussion.
+
+    <ol>
+
+        <li>I randomly choose a set of 4 corresponding points</li>
+        <li>I calculate the homography matrix between these 4 points</li>
+        <li>I use this to transform the full set of input source points</li>
+        <li>I compute the number of inliers -> source points that when transformed, fall within 0.8 pixels of the
+            predicted point</li>
+        <li>I save this mask of inliers if the number of inliers from this homography is greater than seen before</li>
+        <li>I repeat this process num_iterations (1000) times</li>
+        <li>I calculate the homography from the maximum set of inliers.</li>
+    </ol>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b_ims/new_overlapped/roof/roof_blended_image.png">
+            <div class="desc">manually stitched</div>
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b5/roof_a/roof_final_image.png">
+            <div class="desc">automatically stitched</div>
+        </div>
+    </div>
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b_ims/new_overlapped/room/room_final_image.png">
+            <div class="desc">manually stitched</div>
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b5/room_final_image.png">
+            <div class="desc">automatically stitched</div>
+        </div>
+    </div>
+    There seems to be slight jittering near the L in the poster :( shaky hands perhaps
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b_ims/new_overlapped/roof_num/roof_final_image.png">
+            <div class="desc">manually stitched</div>
+        </div>
+        <div class="image-container">
+            <img src="part_b_ims/b5/roof_final_image.png">
+            <div class="desc">automatically stitched</div>
+        </div>
+    </div>
+    The seam seems a little less prevalent in the automatically stitched one.
+
+    Some reflections! This project was really interesting because it showed me how something that 
+    humans find so intuitive (finding matching points between images) requires so much computation for
+    computers to achieve. It also made me really interested in how the iPhone panorama works. 
+
+    This also illustrated the importance of understanding your coordinate system--many of my bugs came from
+    switched y, x or x, y. I presume this will also be a common source of bugs in the next project :p
+
+
+
+</body>
 
 </html>
