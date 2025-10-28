@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project 4</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Project 4: Neural Radiance Field!</h1>
+
+    <h2>Part 0: Calibrating Your Camera and Capturing a 3D Scan</h2>
+    <div class="desc">
+        I followed the instructions in part 0 to generate my dataset of a smiski! As forewarned, the checking of detection of tags caused some issues. Since I had multiple functions I had to do checking in multiple places to make sure that tags were detected, as well as keeping track of which images had valid extrinsics matrices. I had a bug where I was adding both c2w and w2c, so the visualizations looked very odd (two clumps of frustums). After figuring this out, I then visualized the results!
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_0_ims/sample_smiski.jpg">
+        </div>
+        <div class="image-container">
+            <img src="part_0_ims/smiski_frustum_1.png">
+        </div>
+        <div class="image-container">
+            <img src="part_0_ims/smiski_frustum_2.png">
+        </div>
+    </div>
+
+    <h2>Part 1: Fit a Neural Field to a 2D Image</h2>
+    <div class="desc">
+        I follow the model architecture shown in this part! It took me some time to figure out how finagle the image coordinates to be from 0 to 1. Additionally, I read in images with cv2 with is BGR then saved with skimage which is RGB so I needed to make changes–the image appeared really blue at first! Throughout this process, I learned how to structure and construct a neural network with code on top of the more theoretical foundation I’ve gotten through 189.
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/mlp_img.jpg">
+        </div>
+    </div>
+    
+    <div class="desc">Fox!</div> 
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/fox/100.jpg">
+            <div class="desc">100 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/fox/1000.jpg">
+            <div class="desc">1000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/fox/2000.jpg">
+            <div class="desc">2000 iters</div> 
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/fox/3000.jpg">
+            <div class="desc">3000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/fox/fox.jpg">
+            <div class="desc">original</div> 
+        </div>
+    </div>
+    
+    <div class="desc">
+        Jazz show in New Orleans!
+This one performs worse than the provided fox image as it has a lot more granular detail (more changes between color and lighting in smaller areas)
+
+    </div> 
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/jazz/100.jpg">
+            <div class="desc">100 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/jazz/1000.jpg">
+            <div class="desc">1000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/jazz/2000.jpg">
+            <div class="desc">2000 iters</div> 
+        </div>
+        <div class="image-row">
+            <div class="image-container">
+            <img src="part_1_ims/jazz/3000.jpg">
+            <div class="desc">3000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/jazz/jazz.jpg">
+            <div class="desc">original</div> 
+        </div>
+        </div>
+
+            <div class="desc">
+        my 3 glowing smiskis
+
+    </div> 
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/smiski/100.jpg">
+            <div class="desc">100 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/smiski/1000.jpg">
+            <div class="desc">1000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/smiski/2000.jpg">
+            <div class="desc">2000 iters</div> 
+        </div>
+        <div class="image-row">
+            <div class="image-container">
+            <img src="part_1_ims/smiski/3000.jpg">
+            <div class="desc">3000 iters</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/smiski/smiski.jpg">
+            <div class="desc">original</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/psnr.png">
+            <div class="desc">psnr curve for smiski training</div> 
+        </div>
+
+        </div>
+    <div class="desc">
+        I tested Max positional encoding frequency of 2 and 10, and width of 12 and 256.
+        These were all trained with 3000 iterations and the parameters stated above.
+        <div class="image-row">
+        <div class="image-container">
+            <img src="part_1_ims/smiski_test/2_12.jpg">
+            <div class="desc">MPEF: 2, width: 12-> super blobby, no definition</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/smiski_test/2_256.jpg">
+            <div class="desc">MPEF: 2,  width: 256 -> get general shape but no definition</div> 
+        </div>
+        </div>
+        
+        <div class="image-row">
+            <div class="image-container">
+            <img src="part_1_ims/smiski_test/10_12.jpg">
+            <div class="desc">MPEF: 10,  width: 12 -> get more granular definition</div> 
+        </div>
+        <div class="image-container">
+            <img src="part_1_ims/smiski/3000.jpg">
+            <div class="desc">MPEF: 10,  width: 256 -> granular definition + shape</div> 
+        </div>
+
+    </div>
+        
+
+
+</body>
+
+</html>
