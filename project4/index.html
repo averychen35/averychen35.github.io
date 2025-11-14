@@ -12,7 +12,7 @@
     <h2>Part 0: Calibrating Your Camera and Capturing a 3D Scan</h2>
     <div class="desc">
         I followed the instructions in part 0 to generate my dataset of a smiski! As forewarned, the checking of detection of tags caused some issues. Since I had multiple functions I had to do checking in multiple places to make sure that tags were detected, as well as keeping track of which images had valid extrinsics matrices. I had a bug where I was adding both c2w and w2c, so the visualizations looked very odd (two clumps of frustums). After figuring this out, I then visualized the results!
-    I also had to adjust the scale of my images to prevent out of memory errors, using scale of 0.1 and adjusting the camera matrices accordingly.
+    I also had to adjust the scale of my images to prevent out of memory errors, as loading the images in their original resolution would crash my kernel every time. I used a scale of 0.1 and adjusted the camera matrices accordingly.
     </div>
     <div class="image-row">
         <div class="image-container">
@@ -146,8 +146,9 @@ This one performs worse than the provided fox image as it has a lot more granula
             <img src="part_1_ims/smiski/3000.jpg">
             <div class="desc">MPEF: 10,  width: 256 -> granular definition + shape</div> 
         </div>
-
+        
     </div>
+    These above images show the necessity of positional encoding, which is a contribution this paper made. Without positional encoding, naively optimizing this MLP makes the image look very smooth, and does not adequately capture high frequency details. Since we are trying to fit images with details like edges, it helps if you account for the different frequencies by mapping the input to a higher frequency space. 
 
     <h2>Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
     <h3>Part 2.1: Create Rays from Cameras</h3>
@@ -164,6 +165,9 @@ This one performs worse than the provided fox image as it has a lot more granula
     Pixel to ray: 
     First, I solve for r_o using the equation provided and the w2c matrix. I then solve for x_c to get x_w to then solve for r_d, using the equation given. 
 
+    <br>
+    <br>
+    Throughout these functions I had to keep track of the dimensions of the matrices and homogenous coordinates.
     <h3>Part 2.2: Sampling</h3>
 
     Sampling rays from images:
@@ -212,7 +216,7 @@ My forward pass applies all of these layers accordingly, flattens the positional
 To implement volume rendering, given sigmas, color values (rgbs) and a step_size, I split the calculation into multiple steps. First, I get the T_i values using torch.cumsum, multiplying the sigmas by the step_size, then taking e to the power of the result of -torch.cumsum. I make sure to concatenate a 1 to these T values, as the first transmittance is 1. I calculate the probability of termination which si defined as 1 - e to the power of -sigmas * step_size, and then get the color weights by multiplying the T_is by the probability of termination. To get the final color, I multiply these weights by each color to get the final color. 
 <br>
 <br>
-I then set up a training loop, creating RaysData objects for the training and validation data. During the loop, I use the training data to train the model, and every 25 iterations I render the first validation image, as well as calculate the average PSNR over the 6 validation images. Here, I spent a decent amount of time with reshape and flatten commands to ensure that all the dimensions of the torch tensors matched up for operations. I also hit a few bugs where the values had to be moved to the mps device calculations were being done on. I was able to reach over 23 PSNR after 1000 iterations, training using hyperparameters described on the website.
+I then set up a training loop, creating RaysData objects for the training and validation data. During the loop, I use the training data to train the model, and every 25 iterations I render the first validation image, as well as calculate the average PSNR over the 6 validation images. Here, I spent a decent amount of time with reshape and flatten commands to ensure that all the dimensions of the torch tensors matched up for operations. I also hit a few bugs where the values had to be moved to the mps device calculations were being done on. I was able to reach over 23 PSNR after 1000 iterations, training using hyperparameters described on the website. Something else I learned during this section is that you have to save your model otherwise all of the hard work training will go to waste!
 
 <div class="image-row">
     <div class="image-container">
@@ -247,7 +251,7 @@ I then set up a training loop, creating RaysData objects for the training and va
     </div>
 
     <h3>Part 2.6: Training with your own data</h3>
-    Training on lafufu for a bit seemed fine so I gathered it was the near far parameters that needed tuning, as well as the black borders I fixed below. For my dataset I used a learning rate of 5e-4, 10000 iterations, and near and far parameters of 0.05 and 0.6 respectively.
+    For a while, I was stuck debugging why my own data was performing so poorly. Training on lafufu for a bit seemed fine so I gathered it was the near far parameters that needed tuning, as well as the black borders I fixed below. For my dataset I used a learning rate of 5e-4, 10000 iterations, and near and far parameters of 0.05 and 0.6 respectively.
 <br>
 <br>
 I had to go back and crop out the black borders after undistorting images by using cv2.getOptimalNewCameraMatrix
