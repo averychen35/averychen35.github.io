@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project 4</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Project 5: Fun With Diffusion Models!</h1>
+
+    <h2>Part 0: Setup</h2>
+    <div class="desc">
+        I play around with some different prompts and embeddings, try out 20 vs 100 num inference steps, and use a random seed of 53.
+        Is a happy berkeley student an oxymoron? :P 20 steps is the first row and 100 is the second
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="0/berkeley_student_20.png">
+            <div class="image-row">a happy berkeley student</div>
+        </div>
+        <div class="image-container">
+            <img src="0/oasis_20.png">
+             <div class="image-row">a photo of an oasis</div>
+        </div>
+        <div class="image-container">
+            <img src="0/witch_20.png">
+             <div class="image-row">an oil painting of a witch</div>
+        </div>
+
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="0/berkeley_student_100.png">
+        </div>
+        <div class="image-container">
+            <img src="0/oasis_100.png">
+        </div>
+        <div class="image-container">
+            <img src="0/witch_100.png">
+        </div>
+
+    </div>
+
+    <h2>Part 1: Sampling Loops</h2>
+    <h3>1.1 Implementing the Forward Process</h3>
+    I use torch.randn_like(image) to add noise distributed to a standard normal distribution that is the same shape as the image, and index into alphas_cumprod accordingly to get the alpha values at timestep t. 
+    By running forward(im, t), I am able to produce a noisy version of the image at timestep t, where greater values of t result in a more noisy image.
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.2/campanile.png">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_250.png">
+            <div class="desc">noise level 250</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_500.png">
+            <div class="desc">noise level 500</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_750.png">
+            <div class="desc">noise level 750</div>
+        </div>
+
+    </div>
+
+        <h3>1.2 Classical Denoising</h3>
+        I try denoising using classical methods: with torchvision.transforms.functional.gaussian_blur to remove the higher frequency components. I use kernel_size of 10 and the default calculated sigma. This is pretty ineffective as shown below. This is why we’re moving beyond classical methods into diffusion models!
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.1/1.1_250.png">
+            <div class="desc">noise level 250</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_500.png">
+            <div class="desc">noise level 500</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_750.png">
+            <div class="desc">noise level 750</div>
+        </div>
+
+    </div>
+
+        <div class="image-row">
+        <div class="image-container">
+            <img src="1.2/1.2_250.png">
+            <div class="desc">Gaussian blurred noise level 250</div>
+        </div>
+        <div class="image-container">
+            <img src="1.2/1.2_500.png">
+            <div class="desc">Gaussian blurred noise level 500</div>
+        </div>
+        <div class="image-container">
+            <img src="1.2/1.2_750.png">
+            <div class="desc">Gaussian blurred noise level 750</div>
+        </div>
+
+    </div>
+
+            <h3>1.3 One-Step Denoising</h3>
+        The idea behind one-step denoising is estimating the noise within an image using a pretrained diffusion model and removing it to obtain a less noisy image. We use the text embedding of “a high quality photo”. After estimating the noise, I rearrange the equation to solve for the clean image, which requires subtracting the scaled noise and dividing the result by the sqrt of alpha. 
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.1/1.1_250.png">
+            <div class="desc">noise level 250</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_500.png">
+            <div class="desc">noise level 500</div>
+        </div>
+        <div class="image-container">
+            <img src="1.1/1.1_750.png">
+            <div class="desc">noise level 750</div>
+        </div>
+
+    </div>
+
+        <div class="image-row">
+        <div class="image-container">
+            <img src="1.3/1.3_250.png">
+            <div class="desc">one step denoised noise level 250</div>
+        </div>
+        <div class="image-container">
+            <img src="1.3/1.3_500.png">
+            <div class="desc">one step denoised level 500</div>
+        </div>
+        <div class="image-container">
+            <img src="1.3/1.3_750.png">
+            <div class="desc">one step denoised level 750</div>
+        </div>
+
+    </div>
+
+                <h3>1.4 Iterative Denoising</h3>
+        Later, using strided timesteps that are too large causes issues. But we don’t worry about that here! The idea behind strided timesteps is to save time by computing multiple steps at once. I use the strided_timesteps denoted in this problem with stride of 30. The iteratively denoised campanile seems much more clear, but also more deviated from the original. The one steps is more blurry, and the Gaussian blurred campanile still has a lot of colorful noise. 
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.4/1.4_90.png">
+            <div class="desc">t=90</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_240.png">
+            <div class="desc">t=240</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_390.png">
+            <div class="desc">t=390</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_540.png">
+            <div class="desc">t=540</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_690.png">
+            <div class="desc">t=690</div>
+        </div>
+
+    </div>
+        <div class="image-row">
+            <div class="image-container">
+            <img src="1.7.2/campanile.png">
+            <div class="desc">original</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_final.png">
+            <div class="desc">final iteratively denoised</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_one_step.png">
+            <div class="desc">one step denoised</div>
+        </div>
+        <div class="image-container">
+            <img src="1.4/1.4_gaussian.png">
+            <div class="desc">gaussian blurred</div>
+        </div>
+        </div>
+    <h3>1.5 Diffusion Model Sampling</h3>
+        To generate random photos, I use the prompt “a high quality photo” and generate random noise in the shape of the image torch.randn. Then, I use my iterative_denoise function to generate the following images. At the beginning, a lot of people were being generated, which freaked me out so I generated more images.
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.5/1.5_1.png">
+            <div class="desc">sample 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.5/1.5_2.png">
+            <div class="desc">sample 2</div>
+        </div>
+        <div class="image-container">
+            <img src="1.5/1.5_3.png">
+            <div class="desc">sample 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.5/1.5_4.png">
+            <div class="desc">sample 4</div>
+        </div>
+        <div class="image-container">
+            <img src="1.5/1.5_5.png">
+            <div class="desc">sample 5</div>
+        </div>
+
+    </div>
+
+        <h3>1.6 Classifier-Free Guidance (CFG)</h3>
+        To get more high quality images, we generate an unconditional noise estimate in addition to a conditional noise estimate, calling UNet twice, and use a combination of these two to generate a noise estimate. You can tell that the images in this section are more high quality than the previous, and overall much more vibrant!
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.6/1.6_1.png">
+            <div class="desc">sample 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.6/1.6_2.png">
+            <div class="desc">sample 2</div>
+        </div>
+        <div class="image-container">
+            <img src="1.6/1.6_3.png">
+            <div class="desc">sample 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.6/1.6_4.png">
+            <div class="desc">sample 4</div>
+        </div>
+        <div class="image-container">
+            <img src="1.6/1.6_5.png">
+            <div class="desc">sample 5</div>
+        </div>
+
+    </div>
+
+            <h3>1.7 Image-to-image Translation</h3>
+        
+        I run iterative_denoise_cfg with different noise levels, [1, 3, 5, 7, 10, 20]. As the noise level increases, we go from the “high quality photo” closer and closer to the campanile. It is interesting to see how the general shape and background look good in the beginning, but the details get closer to the original image as we add more noise. 
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.2/campanile.png">
+            <div class="desc">original image</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/1.7_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/sunset.jpg">
+            <div class="desc">original image</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/sunset_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        </div>
+    
+            <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/pumpkin.png">
+            <div class="desc">original image</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7/pumpkin_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        </div>
+    
+    <h3>1.7.1 Editing Hand-Drawn and Web Images</h3>
+        
+        I now try using images from online or hand drawn images. It looks like the model may have included some nudity for the drawing of the guy with the spiky hair so I redacted one of the images :/ It’s interesting to see how we go from people to more mushroom shaped to my mushroom. For the dino, the evolution seems to be mostly in the colors, and it’s funny how we go from realistic people to a penguin. 
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_hand_drawn_1.png">
+            <div class="desc">spiky hair man</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_1.png">
+            <div class="desc">noise 3 (redacted)</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+    </div>
+    
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_mushroom.png">
+            <div class="desc">mushroom</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_1_m.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_m_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_m_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_m_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_m_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/1.7.1_m_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        
+        </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.1/dino.png">
+            <div class="desc">dino</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/dino_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        
+        </div>
+        <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.1/penguin.jpg">
+            <div class="desc">penguin</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_1.png">
+            <div class="desc">noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_3.png">
+            <div class="desc">noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_5.png">
+            <div class="desc">noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_7.png">
+            <div class="desc">noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_10.png">
+            <div class="desc">noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.1/penguin_20.png">
+            <div class="desc">noise 20</div>
+        </div>
+        
+        </div>
+    
+        <h3>1.7.2 Inpainting</h3>
+        
+        For inpainting, I make minor edits to the iterative_denoise_cfg function. I add extra code to compute the noised original at this timestep and another line to utilize the mask when constructing the new image. I tried the pumpkin image twice and it filled it in with a pumpkin twice! I have to alter the step size within strided timestpes to be 10 to achieve better results!
+
+        <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.2/campanile.png">
+            <div class="desc">og campanile</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/camp_mask.png">
+            <div class="desc">mask</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/camp_replace.png">
+            <div class="desc">to replace</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/1.7.2.png">
+            <div class="desc">final image</div>
+        </div>
+    </div>
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/pumpkin.png">
+            <div class="desc">og pumpkin</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/pumpkin_mask.png">
+            <div class="desc">mask</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/pumpkin_replace.png">
+            <div class="desc">to replace</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/pumpkin_inpaint.png">
+            <div class="desc">final image</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/sunset.jpg">
+            <div class="desc">original image</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/mask1.png">
+            <div class="desc">mask</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/replace1.png">
+            <div class="desc">to replace</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.2/new_sunset.png">
+            <div class="desc">final image</div>
+        </div>
+    </div>
+
+<h3>1.7.3 Text-Conditional Image-to-image Translation</h3>
+        
+       For this step, I use a text prompt to guide a given image to also look like a text prompt. I call iterative_denoise_cfg with a different value for the noise and the greater the noise, the closer the image is to the original image. 
+       Prompts I used: "a christmas themed dog", "a photo of an oasis", "an oil painting of a princess". 
+       It is interesting to observe how the positioning and coloring of the dog is more like a pumpkin, and how the background of the oasis resembles the oasis more. The princess and campanile interpretation is quite interesting, I'm not sure why the arms are still out though!
+            <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/pumpkin.png">
+            <div class="desc">og image: pumpkin</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_1.png">
+            <div class="desc">dog noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_3.png">
+            <div class="desc">dog noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_5.png">
+            <div class="desc">dog noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_7.png">
+            <div class="desc">dog noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_10.png">
+            <div class="desc">dog noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/dog_20.png">
+            <div class="desc">dog noise 20</div>
+        </div>
+    </div>
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="1.7/sunset.jpg">
+            <div class="desc">og image: sunset</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_1.png">
+            <div class="desc">oasis noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_3.png">
+            <div class="desc">oasis noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_5.png">
+            <div class="desc">oasis noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_7.png">
+            <div class="desc">oasis noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_10.png">
+            <div class="desc">oasis noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/oasis_20_yes.png">
+            <div class="desc">oasis noise 20</div>
+        </div>
+    </div>
+
+        <div class="image-row">
+        <div class="image-container">
+            <img src="1.7.2/campanile.png">
+            <div class="desc">og image: campanile</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_1.png">
+            <div class="desc">princess noise 1</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_3.png">
+            <div class="desc">princess noise 3</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_5.png">
+            <div class="desc">princess noise 5</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_7.png">
+            <div class="desc">princess noise 7</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_10.png">
+            <div class="desc">princess noise 10</div>
+        </div>
+        <div class="image-container">
+            <img src="1.7.3/princess_20.png">
+            <div class="desc">princess noise 20</div>
+        </div>
+    </div>
+    
+    <h3>1.8 Visual Anagrams</h3>
+        
+       I create visual anagrams which look like two different prompts right side up or upside down by obtaining two noise estimates, each with different orientation and prompt. I then flip the second noise estimate which corresponds to the flipped image, and average these two noise estimates. Here’s my two results and prompts!
+        <div class="image-row">
+            <div class="image-container">
+            <img src="1.8/cats.png">
+            <div class="desc">an oil painting of two cats</div>
+        </div>
+        <div class="image-container">
+            <img src="1.8/chess_pieces.png">
+            <div class="desc">an oil painting of two chess pieces</div>
+        </div>
+        </div>
+        <div class="image-row">
+            <div class="image-container">
+            <img src="1.8/city.png">
+            <div class="desc">an oil painting of an urban city</div>
+        </div>
+        <div class="image-container">
+            <img src="1.8/witch.png">
+            <div class="desc">an oil painting of a witch</div>
+        </div>
+        </div>
+        <h3>1.9 Hybrid Images</h3>
+        
+       To create hybrid images, I use a similar approach to part 1.8. Except these two noise estimates are computed on the image right side up with different prompts. I then use torchvision.transforms.function.gaussian_blur to get the low frequency and high frequency components of the noise estimates (low by just calling gaussian_blur on the noise, and the high by subtracting the gaussian_blur value from the original noise estimate). Then, I add these two noise estimates together to get the final hybrid images!
+        <div class="image-row">
+            <div class="image-container">
+            <img src="1.9/cats_chess.png">
+            <div class="desc">near: an oil painting of two chess pieces</div>
+            <div class="desc">far: an oil painting of two cats</div>
+        </div>
+        <div class="image-container">
+            <img src="1.9/witch_city_2.png">
+            <div class="desc">near: an oil painting of an urban city</div>
+            <div class="desc">far: an oil painting of a witch</div>
+        </div>
+        </div>
+
+
+
+</body>
+
+</html>
