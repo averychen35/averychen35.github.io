@@ -13,6 +13,7 @@
     <div class="desc">
         I play around with some different prompts and embeddings, try out 20 vs 100 num inference steps, and use a random seed of 53.
         Is a happy berkeley student an oxymoron? :P 20 steps is the first row and 100 is the second
+        The Berkeley student with greater inference steps has more high frequency details like the bricks on the ground. Only the oasis with more inference steps has water, and the color of the water is somewhat realistic. The witch with more inference steps also has more details in the hair and background.
     </div>
     <div class="image-row">
         <div class="image-container">
@@ -103,6 +104,7 @@
     </div>
 
             <h3>1.3 One-Step Denoising</h3>
+            The idea behind diffusion models is the following: it’s easy to add noise to an image, so our model aims to “reverse” this process by denoising the image. 
         The idea behind one-step denoising is estimating the noise within an image using a pretrained diffusion model and removing it to obtain a less noisy image. We use the text embedding of “a high quality photo”. After estimating the noise, I rearrange the equation to solve for the clean image, which requires subtracting the scaled noise and dividing the result by the sqrt of alpha. 
 
     <div class="image-row">
