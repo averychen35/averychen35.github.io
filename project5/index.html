@@ -692,8 +692,390 @@
         </div>
         </div>
 
+    <h2>Part B: Training a Diffusion Model</h2>
+
+    <h3>Part 1: Training a Single-Step Denoising UNet</h3>
+    <h3>1.1 Implementing the UNet</h3>
+    Alright! In this part, I build a UNet based on the architecture shown below. I build standard operations, that are pieced together to create our final architecture. 
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/atomic_ops_new.png">
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/unconditional_arch.png">
+        </div>
+    </div>
+
+    <h3>1.2 Using the UNet to Train a Denoiser</h3>
+    Now that our model is built, we must train it! To train our model, we use MNIST digits. To learn how to load the images from MNIST I used this  <a href="https://www.youtube.com/watch?v=33ysE1Gt1G4">video</a>.
+I created a function to add noise based on a noise level for images–results are visualized below. 
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_0.png">
+        <div class="desc">level 0</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_0.2.png">
+        <div class="desc">level 0.2</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_0.4.png">
+        <div class="desc">level 0.4</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_0.6.png">
+        <div class="desc">level 0.6</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_0.8.png">
+        <div class="desc">level 0.8</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/noisy_image_level_1.png">
+        <div class="desc">level 1</div>
+    </div>
+</div>
+
+<h3>1.2.1 Training</h3>
+
+While training with noise level 0.5, I add noise to each image, then use the model to predict the clean image corresponding to the noisy image. To calculate loss we take L2 loss over the clean image and the predicted clean image. We can see that epoch 5 has much more clear digits than epoch 1 which makes sense, because more training has happened by then!
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/training.png">
+        <div class="desc">loss curve</div>
+    </div>
+</div>
+
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.1_input_image_0.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_0_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+        <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_0_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+</div>
+
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.1_input_image_1.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_1_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+        <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_1_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+</div>
+
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.1_input_image_2.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_2_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+        <div class="image-container">
+        <img src="part_b/1.2.1_noisy_image_2_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+</div>
+
+<h3>1.2.2 Out-of-Distribution Testing</h3>
+
+Here, we sample out-of-distribution noise levels after the model is trained. The results on the number 7 for these two examples seem mostly legible until noise levels 0.8 and 1, where the resulting image features artifacts in the 7. 
+
+<div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_0.png">
+        <div class="desc">level 0</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_0.2.png">
+        <div class="desc">level 0.2</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_0.4.png">
+        <div class="desc">level 0.4</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_0.6.png">
+        <div class="desc">level 0.6</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_0.8.png">
+        <div class="desc">level 0.8</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_level_1.png">
+        <div class="desc">level 1</div>
+    </div>
+    </div>
+    denoised results
+
+    <div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_0_epoch5.png">
+        <div class="desc">level 0</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_0.2_epoch5.png">
+        <div class="desc">level 0.2</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_0.4_epoch5.png">
+        <div class="desc">level 0.4</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_0.6_epoch5.png">
+        <div class="desc">level 0.6</div>
+    </div>
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_0.8_epoch5.png">
+        <div class="desc">level 0.8</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.2_noisy_image_1_epoch5.png">
+        <div class="desc">level 1</div>
+    </div>
+    </div>
+
+<h3>1.2.3 Denoising Pure Noise</h3>
+
+We do an interesting experiment here, training the model with input images of pure noise. Because we’re minimizing mean squared error, we’re finding the “centroid” of all of our training images, or our average digit. This is a process of generating the average image because we start from noise. We can see that our average digit has a lot of curves, perhaps from lots of numbers having curves within them. Our image at 5 epochs looks smoother and it seems like we converge on the average image by then!
+
+    <div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.3_input_image_0.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_0_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_0_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+    </div>
+
+        <div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.3_input_image_1.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_1_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_1_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+    </div>
+
+        <div class="image-row">
+    <div class="image-container">
+        <img src="part_b/1.2.3_input_image_2.png">
+        <div class="desc">input image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_2_epoch1.png">
+        <div class="desc">epoch 1</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part_b/1.2.3_noisy_image_2_epoch5.png">
+        <div class="desc">epoch 5</div>
+    </div>
+    </div>
+
+    <h3>Part 2: Training a Flow Matching Model</h3>
+
+    <h3>2.1 Adding Time Conditioning to UNet</h3>
+    Now, instead of predicting the noisy image from a clean image, we predict the flow, or the velocity from a noisy image to a clean image. We do this by adding time conditioning to UNet with FCBlocks. Here is a diagram showing the new time conditioned unet and the FCBlock that is used to accomplish this.
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/fc_long.png">
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/conditional_arch_fm.png">
+        </div>
+    </div>
+
+    <h3>2.2 Training the UNet</h3>
+
+    Now that we have our time conditioned UNet, we have to train it! We use the following algorithm for training, where we randomly choose a training image and timestep from 0 to 1, add noise to get a noised image, and train our model to predict the flow at a certain timestep. I use a batch size of 64, an exponential learning rate decay, training for 10 epochs. 
+
+        <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/2.3_train.png">
+            <div class="desc">training curve</div>
+        </div>
+    </div>
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/algo1_t_only_fm.png">
+            <div class="desc">training algorithm</div>
+        </div>
+    </div>
+
+    <h3>2.3 Sampling from the UNet</h3>
+
+    Here, I implement sampling with the following algorithm. You can see that at epoch 1 many of the digits seem like scribbles or blobs, but by epoch 10, most of the digits are legible! At first, I didn’t realize that I had to move my models to the device, and it was taking 5 hours. Later, it only took 6 minutes to train my model :’)
+
+            <div class="image-row">
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/algo2_t_only_fm.png">
+            <div class="desc">sampling algorithm</div>
+        </div>
+    </div>
+<div class="image-row">
+        <div class="image-container">
+            <img src="part_b/2.3_epoch1_grid_4x10.png">
+            <div class="desc">epoch 1</div>
+        </div>
+    </div>
+</div>
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/2.3_epoch5_grid_4x10.png">
+            <div class="desc">epoch 5</div>
+        </div>
+    </div>
+</div>
+
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/2.3_epoch10_grid_4x10.png">
+            <div class="desc">epoch 10</div>
+        </div>
+    </div>
+</div>
+
+<h3>2.4 Adding Class-Conditioning to UNet</h3>
+
+Instead of only conditioning on time, we can also add class-conditioning (on the classes for digits 0-9) to our architecture! We do this by adding 2 more FCBlocks. We create a one-hot vector for our class conditioning, and set it to 0 if we don’t want it to condition on the class. We also only use the class conditioning vector 90% of the time (or dropout 10% of the time). The dimensions here were kind of annoying but I figured it out eventually!
+
+<h3>2.5 Training the UNet</h3>
+
+Now we train with class conditioning as well as time conditioning. This is very similar to the last part, except we set the class to the zero vector (dropout) with p_cond. 
 
 
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/algo3_c_fm.png">
+            <div class="desc">training algorithm</div>
+        </div>
+    </div>
+
+    <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/2.5_train.png">
+            <div class="desc">training curve</div>
+        </div>
+    </div>
+
+
+    <h3>2.6 Sampling from the UNet</h3>
+    Now, we sample from our class conditioned UNet! This is also pretty similar to the previous section, except we use classifier-free guidance to get our estimate for the next x_t. Results at epoch 1 are guessable, and results at epoch 10 are much crisper. 
+        <div class="image-row">
+        <div class="image-container">
+            <img src="part_b/algo4_c_fm.png">
+            <div class="desc">sampling algorithm</div>
+        </div>
+    </div>
+<div class="image-row">
+        <div class="image-container">
+            <img src="part_b/epoch1.png">
+            <div class="desc">epoch 1</div>
+        </div>
+    </div>
+</div>
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/epoch5.png">
+            <div class="desc">epoch 5</div>
+        </div>
+    </div>
+</div>
+
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/epoch10.png">
+            <div class="desc">epoch 10</div>
+        </div>
+    </div>
+</div>
+    
+    To get rid of the annoying learning rate scheduler, I first tried the average learning rate which came out to be 1e-4. The results were not quite as good, so I tried a larger learning rate (1e-3) which had results comparable to that of the scheduler. I didn’t want to do 1e-2 for fear it would be too large, as that is our starting learning rate. 
+<div class="image-row">
+        <div class="image-container">
+            <img src="part_b/2.6_epoch1_grid_4x10.png">
+            <div class="desc">epoch 1</div>
+        </div>
+    </div>
+</div>
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/2.6_epoch5_grid_4x10.png">
+            <div class="desc">epoch 5</div>
+        </div>
+    </div>
+</div>
+
+<div class="image-row">
+
+       <div class="image-container">
+            <img src="part_b/2.6_epoch10_grid_4x10.png">
+            <div class="desc">epoch 10</div>
+        </div>
+    </div>
+</div>
+
+This project helped solidify my understanding of training and sampling models from scratch! I thought it was cool to get a more technical understanding and look under a hood, after a more intuition based understanding of diffusion models presented in lecture. 
 </body>
 
 </html>
