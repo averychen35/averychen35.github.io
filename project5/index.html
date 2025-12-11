@@ -50,12 +50,6 @@
 
     <div class="image-row">
         <div class="image-container">
-            <img src="1.1/1.1_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
-    <div class="image-row">
-        <div class="image-container">
             <img src="1.7.2/campanile.png">
             <div class="desc">original</div>
         </div>
@@ -147,12 +141,7 @@
 
                 <h3>1.4 Iterative Denoising</h3>
         Later, using strided timesteps that are too large causes issues. But we don’t worry about that here! The idea behind strided timesteps is to save time by computing multiple steps at once. I use the strided_timesteps denoted in this problem with stride of 30. The iteratively denoised campanile seems much more clear, but also more deviated from the original. The one steps is more blurry, and the Gaussian blurred campanile still has a lot of colorful noise. 
-    <div class="image-row">
-        <div class="image-container">
-            <img src="1.4/1.4_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
+
     <div class="image-row">
         <div class="image-container">
             <img src="1.4/1.4_90.png">
@@ -223,12 +212,7 @@
 
         <h3>1.6 Classifier-Free Guidance (CFG)</h3>
         To get more high quality images, we generate an unconditional noise estimate in addition to a conditional noise estimate, calling UNet twice, and use a combination of these two to generate a noise estimate. You can tell that the images in this section are more high quality than the previous, and overall much more vibrant!
-    <div class="image-row">
-        <div class="image-container">
-            <img src="1.6/1.6_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
+
         <div class="image-row">
         <div class="image-container">
             <img src="1.6/1.6_1.png">
@@ -481,12 +465,6 @@
         <h3>1.7.2 Inpainting</h3>
         
         For inpainting, I make minor edits to the iterative_denoise_cfg function. I add extra code to compute the noised original at this timestep and another line to utilize the mask when constructing the new image. I tried the pumpkin image twice and it filled it in with a pumpkin twice! I have to alter the step size within strided timestpes to be 10 to achieve better results!
-<div class="image-row">
-        <div class="image-container">
-            <img src="1.7.2/1.7.2_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
         <div class="image-row">
         <div class="image-container">
             <img src="1.7.2/campanile.png">
@@ -644,12 +622,7 @@
     <h3>1.8 Visual Anagrams</h3>
         
        I create visual anagrams which look like two different prompts right side up or upside down by obtaining two noise estimates, each with different orientation and prompt. I then flip the second noise estimate which corresponds to the flipped image, and average these two noise estimates. Here’s my two results and prompts!
-        <div class="image-row">
-        <div class="image-container">
-            <img src="1.8/1.8_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
+
        <div class="image-row">
             <div class="image-container">
             <img src="1.8/cats.png">
@@ -673,12 +646,7 @@
         <h3>1.9 Hybrid Images</h3>
         
        To create hybrid images, I use a similar approach to part 1.8. Except these two noise estimates are computed on the image right side up with different prompts. I then use torchvision.transforms.function.gaussian_blur to get the low frequency and high frequency components of the noise estimates (low by just calling gaussian_blur on the noise, and the high by subtracting the gaussian_blur value from the original noise estimate). Then, I add these two noise estimates together to get the final hybrid images!
-        <div class="image-row">
-        <div class="image-container">
-            <img src="1.9/1.9_code.png">
-            <div class="desc">code</div>
-        </div>
-    </div>
+
        <div class="image-row">
             <div class="image-container">
             <img src="1.9/cats_chess.png">
